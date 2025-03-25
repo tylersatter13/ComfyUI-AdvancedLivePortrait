@@ -92,6 +92,50 @@ class PreparedSrcImg:
 
 import requests
 from tqdm import tqdm
+from ultralytics.nn.tasks import DetectionModel  # Import the class to allowlist it
+import torch.serialization  # Import torch.serialization for safe_globals
+from ultralytics.nn.modules.conv import Conv  # Import Conv to allowlist it
+
+# Allowlist the DetectionModel class for safe unpickling
+torch.serialization.add_safe_globals([DetectionModel])
+from torch.nn.modules.container import Sequential  # Import Sequential to allowlist it
+# Allowlist the Sequential class for safe unpickling
+torch.serialization.add_safe_globals([Sequential])
+# Allowlist the Conv class for safe unpickling
+torch.serialization.add_safe_globals([Conv])
+from torch.nn.modules.conv import Conv2d  # Import Conv2d to allowlist it
+# Allowlist the Conv2d class for safe unpickling
+torch.serialization.add_safe_globals([Conv2d])
+from torch.nn.modules.batchnorm import BatchNorm2d  # Import BatchNorm2d to allowlist it
+# Allowlist the BatchNorm2d class for safe unpickling
+torch.serialization.add_safe_globals([BatchNorm2d])
+from torch.nn.modules.activation import SiLU  # Import SiLU to allowlist it
+# Allowlist the SiLU class for safe unpickling
+torch.serialization.add_safe_globals([SiLU])
+from ultralytics.nn.modules.block import C2f  # Import C2f to allowlist it
+# Allowlist the C2f class for safe unpickling
+torch.serialization.add_safe_globals([C2f])
+from torch.nn.modules.container import ModuleList  # Import ModuleList to allowlist it
+# Allowlist the ModuleList class for safe unpickling
+torch.serialization.add_safe_globals([ModuleList])
+from ultralytics.nn.modules.block import Bottleneck  # Import Bottleneck to allowlist it
+# Allowlist the Bottleneck class for safe unpickling
+torch.serialization.add_safe_globals([Bottleneck])
+from ultralytics.nn.modules.block import SPPF  # Import SPPF to allowlist it
+# Allowlist the SPPF class for safe unpickling
+torch.serialization.add_safe_globals([SPPF])
+from torch.nn.modules.pooling import MaxPool2d  # Import MaxPool2d to allowlist it
+# Allowlist the MaxPool2d class for safe unpickling
+torch.serialization.add_safe_globals([MaxPool2d])
+from torch.nn.modules.upsampling import Upsample  # Import Upsample to allowlist it
+# Allowlist the Upsample class for safe unpickling
+torch.serialization.add_safe_globals([Upsample])
+from ultralytics.nn.modules.conv import Concat  # Import Concat to allowlist it
+# Allowlist the Concat class for safe unpickling
+torch.serialization.add_safe_globals([Concat])
+from ultralytics.nn.modules.head import Detect  # Import Detect to allowlist it
+# Allowlist the Detect class for safe unpickling
+torch.serialization.add_safe_globals([Detect])
 
 class LP_Engine:
     pipeline = None
@@ -142,7 +186,6 @@ class LP_Engine:
         return filtered_checkpoint
 
     def load_model(self, model_config, model_type):
-
         device = get_device()
 
         if model_type == 'stitching_retargeting_module':
@@ -151,12 +194,15 @@ class LP_Engine:
             ckpt_path = os.path.join(get_model_dir("liveportrait"), "base_models", model_type + ".pth")
 
         is_safetensors = None
-        if os.path.isfile(ckpt_path) == False:
+        if not os.path.isfile(ckpt_path):
             is_safetensors = True
             ckpt_path = os.path.join(get_model_dir("liveportrait"), model_type + ".safetensors")
-            if os.path.isfile(ckpt_path) == False:
-                self.download_model(ckpt_path,
-                "https://huggingface.co/Kijai/LivePortrait_safetensors/resolve/main/" + model_type + ".safetensors")
+            if not os.path.isfile(ckpt_path):
+                self.download_model(
+                    ckpt_path,
+                    "https://huggingface.co/Kijai/LivePortrait_safetensors/resolve/main/" + model_type + ".safetensors"
+                )
+
         model_params = model_config['model_params'][f'{model_type}_params']
         if model_type == 'appearance_feature_extractor':
             model = AppearanceFeatureExtractor(**model_params).to(device)
@@ -167,7 +213,6 @@ class LP_Engine:
         elif model_type == 'spade_generator':
             model = SPADEDecoder(**model_params).to(device)
         elif model_type == 'stitching_retargeting_module':
-            # Special handling for stitching and retargeting module
             config = model_config['model_params']['stitching_retargeting_module_params']
             checkpoint = comfy.utils.load_torch_file(ckpt_path)
 
