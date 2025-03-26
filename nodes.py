@@ -136,6 +136,9 @@ torch.serialization.add_safe_globals([Concat])
 from ultralytics.nn.modules.head import Detect  # Import Detect to allowlist it
 # Allowlist the Detect class for safe unpickling
 torch.serialization.add_safe_globals([Detect])
+from ultralytics.nn.modules.block import DFL  # Import DFL to allowlist it
+# Allowlist the DFL class for safe unpickling
+torch.serialization.add_safe_globals([DFL])
 
 class LP_Engine:
     pipeline = None
